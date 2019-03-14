@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/bk3/webpack-airbrake-private-sourcemaps#readme",
   "dependencies": {
+    "globby": "^9.1.0",
     "request": "^2.85.0"
   }
 }

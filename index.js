@@ -1,5 +1,6 @@
 const fs = require('fs');
 const request = require('request');
+const globby = require('globby');
 
 /*
  * Airbrake extract plugin
@@ -104,7 +105,7 @@ AirbrakePlugin.prototype.apply = function(compiler) {
                 }
 
                 if (fs.existsSync(dir)) {
-                    fs.readdirSync(dir).forEach(file => {
+                    globby.sync('**/*.js.map', { cwd: dir }).forEach(file => {
                         uploadFile(dir, file);
                     });
                 } else if (logging) {
