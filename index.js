@@ -51,8 +51,9 @@ AirbrakePlugin.prototype.apply = function(compiler) {
                     return console.error('Error: upload failed - ', err);
                 }
 
+                console.log('--- uploaded file: ', filePath);
+
                 if (logging) {
-                    console.log('--- uploaded file: ', filePath);
                     console.log('posted to:', airbrakeUrl);
                     console.log('post data:', postData);
                     console.log('Server responded with:', body);
