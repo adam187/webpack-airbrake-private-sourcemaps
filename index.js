@@ -110,7 +110,7 @@ AirbrakePlugin.prototype.apply = function(compiler) {
 
         if (directories && directories.length) {
             return Promise.all( 
-                directories.map((dir) => {
+                directories.map(async (dir) => {
                     if (logging) {
                         console.log('- Scanning directory:', dir);
                     }
