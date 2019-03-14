@@ -109,21 +109,23 @@ AirbrakePlugin.prototype.apply = function(compiler) {
         }
 
         if (directories && directories.length) {
-            directories.forEach(dir => {
-                if (logging) {
-                    console.log('- Scanning directory:', dir);
-                }
-
-                if (fs.existsSync(dir)) {
-                    const files = await globby('**/*.js.map', { cwd: dir });
-
-                    return Promise.all(
-                        files.map((file) => uploadFile(dir, file))
-                    );
-                } else if (logging) {
-                    console.log(`- directory: ${dir} not available`);
-                }
-            });
+            return Promise.all( 
+                directories.map((dir) => {
+                    if (logging) {
+                        console.log('- Scanning directory:', dir);
+                    }
+    
+                    if (fs.existsSync(dir)) {
+                        const files = await globby('**/*.js.map', { cwd: dir });
+    
+                        return Promise.all(
+                            files.map((file) => uploadFile(dir, file))
+                        );
+                    } else if (logging) {
+                        console.log(`- directory: ${dir} not available`);
+                    }
+                })
+            );
         }
     });
 };
