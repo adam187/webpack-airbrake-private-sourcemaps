@@ -25,9 +25,15 @@ AirbrakePlugin.prototype.apply = function(compiler) {
      * Upload file to sourcemaps
      */
     const uploadFile = (path, file) => {
-        const filePath = path + '/' + file;
+        return new Promise((resolve, reject) => {
+            const filePath = path + '/' + file;
 
-        if (file.slice(-4) === '\.map' && !fs.lstatSync(filePath).isDirectory()) {
+            if (!file.slice(-4) === '\.map') {
+                console.log(`- won't upload file: ${filePath}`);
+
+                return reject();
+            }
+
             if (logging) {
                 console.log(`- will upload file: ${filePath}`);
             }
@@ -48,6 +54,8 @@ AirbrakePlugin.prototype.apply = function(compiler) {
 
             request.post(airbrakeUrl, postData, (err, httpResponse, body) => {
                 if (err) {
+                    reject(err);
+
                     return console.error('Error: upload failed - ', err);
                 }
 
@@ -63,19 +71,20 @@ AirbrakePlugin.prototype.apply = function(compiler) {
                     fs.unlink(filePath, (err) => {
                         if (err) throw err;
                         console.log(`${filePath} was deleted`);
+                        resolve();
                     });
+                } else {
+                    resolve();
                 }
             });
-        } else if (logging) {
-            console.log(`- won't upload file: ${filePath}`);
-        }
+        });
     };
 
 
     /*
      * Upload sourcemaps after compilation is complete
      */
-    compiler.hooks.done.tap('AirbrakePlugin', () => {
+    compiler.hooks.done.tapPromise('AirbrakePlugin', async () => {
         const { directories } = this.options;
         console.log('Starting Airbrake sourcemaps upload...');
 
@@ -106,9 +115,11 @@ AirbrakePlugin.prototype.apply = function(compiler) {
                 }
 
                 if (fs.existsSync(dir)) {
-                    globby.sync('**/*.js.map', { cwd: dir }).forEach(file => {
-                        uploadFile(dir, file);
-                    });
+                    const files = await globby('**/*.js.map', { cwd: dir });
+
+                    return Promise.all(
+                        files.map((file) => uploadFile(dir, file))
+                    );
                 } else if (logging) {
                     console.log(`- directory: ${dir} not available`);
                 }
