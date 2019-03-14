@@ -74,7 +74,7 @@ AirbrakePlugin.prototype.apply = function(compiler) {
     /*
      * Upload sourcemaps after compilation is complete
      */
-    compiler.plugin('done', (compilation) => {
+    compiler.hooks.done.tap('AirbrakePlugin', () => {
         const { directories } = this.options;
         console.log('Starting Airbrake sourcemaps upload...');
 
