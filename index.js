@@ -85,7 +85,7 @@ AirbrakePlugin.prototype.apply = function(compiler) {
      * Upload sourcemaps after compilation is complete
      */
     compiler.hooks.done.tapPromise('AirbrakePlugin', async () => {
-        const { directories } = this.options;
+        const { directories, patterns } = this.options;
         console.log('Starting Airbrake sourcemaps upload...');
 
         if (!projectId) {
@@ -116,7 +116,7 @@ AirbrakePlugin.prototype.apply = function(compiler) {
                     }
     
                     if (fs.existsSync(dir)) {
-                        const files = await globby('**/*.js.map', { cwd: dir });
+                        const files = await globby(patterns || '**/*.js.map', { cwd: dir });
     
                         return Promise.all(
                             files.map((file) => uploadFile(dir, file))
